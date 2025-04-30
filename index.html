@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Divine Guidance</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kurenaido&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* Reset & Base */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      font-family: 'Poppins', sans-serif;
+      background: black;
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50px; left: -50px; right: -50px; bottom: -50px;
+      background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, rgba(0,0,0,0.9) 70%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .floating-text {
+      position: absolute;
+      color: #FFD700;
+      font-family: 'Zen Kurenaido', cursive;
+      opacity: 0.3;
+      font-size: 18px;
+      animation: float 25s linear infinite;
+      z-index: 1;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+    }
+
+    .main-wrapper {
+      z-index: 2;
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex-direction: column;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 0 20px #ffd700;
+      color: #ffd700;
+    }
+
+    h1 {
+      font-size: 2em;
+      text-align: center;
+      margin-bottom: 25px;
+      font-family: 'Zen Kurenaido', cursive;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+    }
+
+    button {
+      background-color: #ffd700;
+      border: none;
+      border-radius: 30px;
+      padding: 12px 25px;
+      font-size: 1.1em;
+      margin-top: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #ffc107;
+    }
+
+    .loader {
+      display: none;
+      margin: 20px auto;
+      border: 6px solid #ffd700;
+      border-top: 6px solid transparent;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .result {
+      margin-top: 30px;
+      background-color: rgba(255, 255, 255, 0.08);
+      padding: 20px;
+      border-radius: 15px;
+      text-align: left;
+    }
+
+    .share-btn {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .share-btn a {
+      background: #25D366;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .branding {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 0.9em;
+      color: #bbb;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 1.6em; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Floating "Radhe Radhe" Text -->
+<script>
+for (let i = 0; i < 40; i++) {
+  let el = document.createElement('div');
+  el.className = 'floating-text';
+  el.innerText = 'Radhe Radhe';
+  el.style.left = Math.random() * 100 + 'vw';
+  el.style.animationDuration = (20 + Math.random() * 10) + 's';
+  el.style.fontSize = (16 + Math.random() * 10) + 'px';
+  document.body.appendChild(el);
+}
+</script>
+
+<div class="main-wrapper">
+  <div class="container">
+    <h1>🌼 Divine Guidance App 🌼</h1>
+
+    <input type="text" id="question" placeholder="What's your question about life?" />
+    <button onclick="getAnswer()">Get Answer</button>
+
+    <div class="loader" id="loader"></div>
+
+    <div id="answer" class="result"></div>
+
+    <div class="share-btn" id="shareBtn">
+      <a id="whatsappLink" href="#" target="_blank">📲 Share on WhatsApp</a>
+    </div>
+
+    <div class="branding">
+      Powered by <strong>Divine Guidance</strong><br>
+      Created by <strong>Viddhesh Shukla</strong> 🌟
+    </div>
+  </div>
+</div>
+
+<!-- JS Logic -->
+<script>
+async function getAnswer() {
+  const question = document.getElementById("question").value.trim();
+  const answerDiv = document.getElementById("answer");
+  const loader = document.getElementById("loader");
+  const shareBtn = document.getElementById("shareBtn");
+  const whatsappLink = document.getElementById("whatsappLink");
+
+  if (!question) {
+    alert("Please enter a question!");
+    return;
+  }
+
+  answerDiv.innerHTML = "";
+  loader.style.display = "block";
+  shareBtn.style.display = "none";
+
+  const res = await fetch("/ask", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query: question })
+  });
+
+  const data = await res.json();
+  loader.style.display = "none";
+
+  if (data.error) {
+    answerDiv.innerHTML = "❌ Error: " + data.error;
+    return;
+  }
+
+  const resultHTML = `
+    <h3>✨ Your Divine Shlok ✨</h3>
+    <p><strong>Shlok (Sanskrit):</strong><br> ${data.shlok}</p>
+    <p><strong>Meaning:</strong><br> ${data.translation}</p>
+    <p><strong>Explanation:</strong><br> ${data.explanation}</p>
+    <p><em>(Chapter ${data.chapter}, Verse ${data.verse})</em></p>
+  `;
+
+  answerDiv.innerHTML = resultHTML;
+
+  // Set WhatsApp share
+  const msg = `🕉 Divine Gita Guidance 🕉\n\nQuestion: ${question}\n\nShlok: ${data.shlok}\nMeaning: ${data.translation}\n(Ch ${data.chapter}, Verse ${data.verse})`;
+  whatsappLink.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  shareBtn.style.display = "block";
+}
+</script>
+
+</body>
+</html>
